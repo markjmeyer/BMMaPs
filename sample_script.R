@@ -3,7 +3,7 @@
 #	from Meyer and Knutson 2018 									
 #																	
 # Created:  10/26/2018												
-# Modified: 10/26/2018												
+# Modified: 02/14/2019												
 #																	
 # By: Mark J Meyer													
 #																	
@@ -39,26 +39,17 @@ X2	<- X2ash[,,d]	# matrix of outcomes for second treatment
 #	X1as50.RData and X2as50.RData for 150% concordant (as % of original data)
 #	X1asD.RData and X2asD.RData	for 200% concordant (as % of original data)
 
-## set priors for half-Cauchy BMMaPs ##
-pvSpec	<- list(lambda = 300, omega = 100,
-				tTune = 0.04, nuTau = 5^2,
-				sTune = c(0.0015, 0.002), nuSig = 3^2)
-
-## run model ##
-B		<- 100	# 1000
-burnin	<- 100	# 1000 
-modelHC	<- bmmaps(X1, X2, link = 'logit', B = B, burn = burnin, up = 100, priorVar = "HC",
-				pvSpec = pvSpec)
-
-## set priors for vMCMC BMMaPs ##
+## set priors for multivariate item response ##
 pvSpec	<- list(a_lambda = 0.001, a_gamma = 0.001, b_gamma = 0.001,
 				a_omega = 0.001, a_eta = 0.001, b_eta = 0.001,
-				tol = 1e-10, maxIter = 10)
+				tol = 1e-10, maxIter = 10, mut = rep(0, ncol(X1)),
+				mub = rep(0, ncol(X1)), mua1 = rep(0, ncol(X1)),
+				mua2 = rep(0, ncol(X1)))
 	
-## run model ##
+## run multivariate item response model ##
 B		<- 100	# 1000
 burnin	<- 100
-modelVB	<- bmmaps(X1, X2, link = 'logit', B = B, burn = burnin, up = 100, priorVar = "VB",
+modelVB	<- bmir(X1, X2, link = 'logit', B = B, burn = burnin, up = 100, priorVar = "VB",
 				pvSpec = pvSpec)
 
 ## chain length ##
@@ -71,3 +62,97 @@ modelVB	<- bmmaps(X1, X2, link = 'logit', B = B, burn = burnin, up = 100, priorV
 ## compare model results ##
 summary(modelHC)
 summary(modelVB)
+
+## set priors for independent multinomials model ##
+prior		<- list(alpha = matrix(1/2, nrow = ncol(X1), ncol = 4))
+
+## run independent multinomials model ##
+B			<- 1000
+burnin		<- 1000
+modelIMM	<- bim(X1, X2, B = B, burn = burnin, prior = prior)
+
+summary(modelIMM)
+
+
+prior		<- list(alpha = matrix(c(rep(1/2, 4*3), rep(1, 4*2)), nrow = ncol(X1), ncol = 4, byrow = TRUE))
+
+## run independent multinomials model ##
+B			<- 3000
+burnin		<- 1000
+prior		<- list(alpha = matrix(c(rep(1/2, 4*3)), nrow = ncol(X1), ncol = 4, byrow = TRUE))
+modelIMM	<- bim(X1, X2, B = B, burn = burnin, prior = prior)
+
+summary(modelIMM)
+
+dim(modelIMM$theta)
+
+apply(modelIMM$theta, c(2,3), mean)
+
+exp(cmhExact(X1, X2)$est)
+
+gbmmps(X1, X2)
+
+exp(gbmmps(X1, X2)$est)
+
+
+setwd('/Users/mjm556/Dropbox/Research/Drafts/Matched Proportions/Data')
+library(readstata13)
+socw		<- read.dta13('knutson_data_wide.dta')
+
+pc		<- socw[,c('PC_school', 'PC_CPS', 'PC_MH', 'PC_JJ', 'PC_DD')]
+colnames(pc)	<- c('SS', 'CPS', 'MH', 'JJ', 'DD')
+
+sc		<- socw[,c('Psych_school', 'Psych_CPS', 'Psych_MH', 'Psych_JJ', 'Psych_DD')]
+colnames(sc)	<- c('SS', 'CPS', 'MH', 'JJ', 'DD')
+
+pc		<- socw[,c('PC_DD', 'PC_MH', 'PC_JJ', 'PC_CPS', 'PC_school')]
+colnames(pc)	<- c('DD', 'MH', 'JJ', 'CPS', 'SS')
+
+sc		<- socw[,c('Psych_DD', 'Psych_MH', 'Psych_JJ', 'Psych_CPS', 'Psych_school')]
+colnames(sc)	<- c('DD', 'MH', 'JJ', 'CPS', 'SS')
+
+
+getCounts(pc, sc, 5)
+
+cmhExact(pc, sc)
+
+pc2		<- socw[,c('PC_school', 'PC_MH')]
+colnames(pc2)	<- c('SS', 'MH')
+
+sc2		<- socw[,c('Psych_school', 'Psych_MH')]
+colnames(sc2)	<- c('SS', 'MH')
+
+X1			<- pc
+X2			<- sc
+B			<- 5000
+burnin		<- 5000
+
+modelIMM	<- bim(X1, X2, B = B, burn = burnin)
+
+summary(modelIMM)
+apply(modelIMM$theta, c(2,3), mean)
+
+sparseTables1	<- apply(modelIMM$MCMCsp$prior$sparsityCheck, 2, sum)
+
+paste(paste(which(sparseTables1 > 0), collapse = ", "), '.', sep = '')
+
+## set up for new BMIR sampler ##
+X1			<- pc
+X2			<- sc
+B			<- 5000
+burnin		<- 5000
+
+n		<- nrow(X1)
+K		<- ncol(X1)
+Y		<- cbind(X1, X2)
+gDat	<- data.frame(y	= c(t(Y)), s = rep(1:(2*K), n), id = rep(1:n, each = 2*K))
+
+X		<- model.matrix(y ~ factor(s) - 1, data = gDat)
+U		<- model.matrix(y ~ factor(id) - 1, data = gDat)
+
+XsCols	<- c(which(apply(matrix(unlist(lapply(getCounts(X1, X2, K), function(x) x == 0)), nrow = 4, byrow = TRUE), 2, sum) > 0), which(apply(matrix(unlist(lapply(getCounts(X1, X2, K), function(x) x == 0)), nrow = 4, byrow = TRUE), 2, sum) > 0) + K)
+
+Xn	<- X[,-XsCols]
+Xs	<- X[,XsCols]
+
+
