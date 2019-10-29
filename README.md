@@ -4,7 +4,7 @@ This repository contains code for Running Bayesian Multivariate Matched Proporti
 # File details
 The file bmmaps.R is the source file for all functions related to running the models.
 
-# Functions
+# Brief Function Description
 All functions two matrices, X1 and X2, as arguments. X1 is an n x K matrix of the first set of binary multivariate outcomes. X2 is an n x K matrix of the second or paired set of binary multivariate outcomes. Each function as additional arguments including prior specification and link.
 
 
