@@ -541,7 +541,7 @@ tau2VB		<- function(n, K, be, a_omega, a_eta, b_eta, B_eta = 0.01, tol = 1e-5, m
 	
 }
 
-## primary function for bmir ##
+## primary function for Bayesian Multivariate Item Response (bmir) model ##
 bmir	<- function(X1, X2, link = 'logit', B, burn = 100, up = 1000, searchIntT = NULL, incT = 0.005, centT = 0.1, searchIntB = NULL, incB = 0.005, centB = 0.1, searchIntA = NULL, incA = 0.01, centA = 0.1, priorVar = 'VB', pvSpec = NULL, ymin = -Inf, ymax = Inf, upFix = TRUE, dlpThresh = 100){
 
 	if(ncol(X1) != ncol(X2)){
@@ -1794,6 +1794,7 @@ setPrior	<- function(X1, X2){
 	
 }
 
+## primary function for Bayesian Independent Dirichlet-Multinomial (bidm) model ##
 bidm	<- function(X1, X2, B, burnin = NULL, prior = NULL,...){
 	if(ncol(X1) != ncol(X2)){
 		stop('column dimensions of X1 and X2 must agree')
@@ -1925,9 +1926,7 @@ pprob.bidm	<- function(mod){
 }
 
 
-### Penalized Marginal Probability Models ###
-# Bayesian SParsity Adjusted Matched-proportions model: BSPAM #
-
+## primary function for Bayesian SParsity Adjusted Matched-proportions (bspam) model ##
 bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None'), prior = NULL, ptype = c('Normal', 't'), covstr = 'Independence', up = 100, dots = up/10){
 	if(ncol(X1) != ncol(X2)){
 		stop('column dimensions of X1 and X2 must agree')
