@@ -541,7 +541,7 @@ tau2VB		<- function(n, K, be, a_omega, a_eta, b_eta, B_eta = 0.01, tol = 1e-5, m
 	
 }
 
-## primary function for Bayesian Multivariate Item Response (bmir) model ##
+## primary function for bmir ##
 bmir	<- function(X1, X2, link = 'logit', B, burn = 100, up = 1000, searchIntT = NULL, incT = 0.005, centT = 0.1, searchIntB = NULL, incB = 0.005, centB = 0.1, searchIntA = NULL, incA = 0.01, centA = 0.1, priorVar = 'VB', pvSpec = NULL, ymin = -Inf, ymax = Inf, upFix = TRUE, dlpThresh = 100){
 
 	if(ncol(X1) != ncol(X2)){
@@ -1058,6 +1058,503 @@ bmir	<- function(X1, X2, link = 'logit', B, burn = 100, up = 1000, searchIntT = 
 	
 }
 
+# bmir_old	<- function(X1, X2, link = 'logit', B, burn = 100, up = 1000, searchIntT = NULL, incT = 0.005, centT = 0.1, searchIntB = NULL, incB = 0.005, centB = 0.1, searchIntA = NULL, incA = 0.01, centA = 0.1, priorVar = 'VB', pvSpec = NULL, ymin = -Inf, ymax = Inf, upFix = TRUE, dlpThresh = 100){
+
+	# if(ncol(X1) != ncol(X2)){
+		# stop('column dimensions of X1 and X2 must agree')
+	# }
+
+	# if(nrow(X1) != nrow(X2)){
+		# stop('row dimensions of X1 and X2 must agree')
+	# }
+
+	# if(link != 'logit' & link != 'probit' & link != 'cloglog'){
+		# stop('improper link specified use either logit, probit, or cloglog')
+	# }
+
+	# if(priorVar != 'VB' & priorVar != 'FX' & priorVar != 'GA' & priorVar != 'HC'){
+		# stop('improper prior variance specified use either VB, HC, GA, or FX')
+	# }
+		
+	# if(B < 1){
+		# stop('B must be at least 1')
+	# }
+	
+	# if(is.null(searchIntA)){
+		# if(link == 'probit'){
+			# searchIntA	<- c(-7,7)
+		# } else if(link == 'cloglog'){
+			# searchIntA	<- c(-13, 3)
+		# } else {
+			# searchIntA	<- c(-10, 10)
+		# }
+	# }
+	
+	# if(is.null(searchIntB)){
+		# if(link == 'cloglog'){
+			# searchIntB	<- c(-5, 3)
+		# } else {
+			# searchIntB	<- c(-5, 5)
+		# }
+	# }
+
+	# if(is.null(searchIntT)){
+		# if(link == 'cloglog'){
+			# searchIntT	<- c(-5, 3)
+		# } else {
+			# searchIntT	<- c(-5, 5)
+		# }
+	# }
+
+	# K		<- ncol(X1)	# number of outcomes
+	# n		<- nrow(X1)	# number of pairs
+	
+	# if(is.null(pvSpec)){
+		# if(priorVar == 'VB'){
+			# a_lambda	<- 0.001
+			# a_gamma		<- 0.001
+			# b_gamma		<- 0.001
+			# a_omega		<- 0.001
+			# a_eta		<- 0.001
+			# b_eta		<- 0.001
+			# tol			<- 1e-5
+			# maxIter		<- 10
+			
+			# mut			<- rep(0, K)
+			# mub			<- rep(0, K)
+			# mua1		<- rep(0, K)
+			# mua2		<- rep(0, K)
+			
+			# siga1		<- rep(10, K)
+			# siga2		<- rep(10, K)
+			
+			# pvSpec	<- list(a_lambda = a_lambda, a_gamma = a_gamma, b_gamma = b_gamma,
+							# a_omega = a_omega, a_eta = a_eta, b_eta = b_eta,
+							# tol = tol, maxIter = maxIter, mut = mut, mub = mub,
+							# mua1 = mua1, mua2 = mua2, siga1 = siga1, siga2 = siga2)
+		# } else if(priorVar == 'GA'){
+			# lambda		<- 100
+			# omega		<- 100
+			# at			<- 1
+			# bt			<- 1
+			# as			<- 1
+			# bs			<- 1
+			
+			# mut			<- rep(0, K)
+			# mub			<- rep(0, K)
+			# mua1		<- rep(0, K)
+			# mua2		<- rep(0, K)
+
+			# siga1		<- rep(10, K)
+			# siga2		<- rep(10, K)
+
+			# pvSpec		<- list(lambda = lambda, omega = omega,
+								# at = at, bt = bt, as = as, bs = bs,
+								# mut = mut, mub = mub, mua1 = mua1, mua2 = mua2,
+								# siga1 = siga1, siga2 = siga2)
+		# } else if(priorVar == 'HC'){
+			# lambda		<- 100
+			# omega		<- 100
+			# tTune		<- 0.01
+			# nuTau		<- 2
+			# sTune		<- rep(0.01, ncol(X1))
+			# nuSig		<- 2
+			
+			# mut			<- rep(0, K)
+			# mub			<- rep(0, K)
+			# mua1		<- rep(0, K)
+			# mua2		<- rep(0, K)
+
+			# siga1		<- rep(10, K)
+			# siga2		<- rep(10, K)
+
+			# pvSpec		<- list(lambda = lambda, omega = omega,
+								# tTune = tTune, nuTau = nuTau,
+								# sTune = sTune, nuSig = nuSig,
+								# mut = mut, mub = mub, mua1 = mua1, mua2 = mua2,
+								# siga1 = siga1, siga2 = siga2)
+		# } else {
+			# lambda		<- 100
+			# omega		<- 100
+
+			# mut			<- rep(0, K)
+			# mub			<- rep(0, K)
+			# mua1		<- rep(0, K)
+			# mua2		<- rep(0, K)
+
+			# siga1		<- rep(10, K)
+			# siga2		<- rep(10, K)
+			
+			# pvSpec		<- list(lambda = lambda, omega = omega, mut = mut, mub = mub,
+								# mua1 = mua1, mua2 = mua2, siga1 = siga1, siga2 = siga2)
+		# }
+	# } else {
+		# if(priorVar == 'VB'){
+			# a_lambda	<- pvSpec$a_lambda
+			# a_gamma		<- pvSpec$a_gamma
+			# b_gamma		<- pvSpec$b_gamma
+			# a_omega		<- pvSpec$a_omega
+			# a_eta		<- pvSpec$a_eta
+			# b_eta		<- pvSpec$b_eta
+			# tol			<- pvSpec$tol
+			# maxIter		<- pvSpec$maxIter
+			
+			# if(is.null(pvSpec$mut)){
+					# mut			<- rep(0, K)
+			# } else {
+				# mut			<- pvSpec$mut			
+			# }
+			# if(is.null(pvSpec$mub)){
+				# mub			<- rep(0, K)
+			# } else {
+				# mub			<- pvSpec$mub			
+			# }
+			# if(is.null(pvSpec$mua1)){
+					# mua1		<- rep(0, K)
+			# } else {
+				# mua1		<- pvSpec$mua1
+			# }
+			# if(is.null(pvSpec$mua2)){
+					# mua2		<- rep(0, K)		
+			# } else {
+				# mua2		<- pvSpec$mua2
+			# }
+			# if(is.null(pvSpec$siga1)){
+					# siga1		<- rep(10, K)
+			# } else {
+				# siga1		<- pvSpec$siga1
+			# }
+			# if(is.null(pvSpec$siga2)){
+					# siga2		<- rep(10, K)		
+			# } else {
+				# siga2		<- pvSpec$siga2
+			# }
+		# } else if(priorVar == 'GA'){
+			# lambda		<- pvSpec$lambda
+			# omega		<- pvSpec$omega
+			# at			<- pvSpec$at
+			# bt			<- pvSpec$bt
+			# as			<- pvSpec$as
+			# bs			<- pvSpec$bs
+
+			# if(is.null(pvSpec$mut)){
+					# mut			<- rep(0, K)
+			# } else {
+				# mut			<- pvSpec$mut			
+			# }
+			# if(is.null(pvSpec$mub)){
+				# mub			<- rep(0, K)
+			# } else {
+				# mub			<- pvSpec$mub			
+			# }
+			# if(is.null(pvSpec$mua1)){
+					# mua1		<- rep(0, K)
+			# } else {
+				# mua1		<- pvSpec$mua1
+			# }
+			# if(is.null(pvSpec$mua2)){
+					# mua2		<- rep(0, K)		
+			# } else {
+				# mua2		<- pvSpec$mua2
+			# }
+			# if(is.null(pvSpec$siga1)){
+					# siga1		<- rep(10, K)
+			# } else {
+				# siga1		<- pvSpec$siga1
+			# }
+			# if(is.null(pvSpec$siga2)){
+					# siga2		<- rep(10, K)		
+			# } else {
+				# siga2		<- pvSpec$siga2
+			# }
+		# } else if(priorVar == 'HC'){
+			# lambda		<- pvSpec$lambda
+			# omega		<- pvSpec$omega
+			# tTune		<- pvSpec$tTune
+			# nuTau		<- pvSpec$nuTau
+			# sTune		<- pvSpec$sTune
+			# nuSig		<- pvSpec$nuSig
+
+			# if(is.null(pvSpec$mut)){
+					# mut			<- rep(0, K)
+			# } else {
+				# mut			<- pvSpec$mut			
+			# }
+			# if(is.null(pvSpec$mub)){
+				# mub			<- rep(0, K)
+			# } else {
+				# mub			<- pvSpec$mub			
+			# }
+			# if(is.null(pvSpec$mua1)){
+					# mua1		<- rep(0, K)
+			# } else {
+				# mua1		<- pvSpec$mua1
+			# }
+			# if(is.null(pvSpec$mua2)){
+					# mua2		<- rep(0, K)		
+			# } else {
+				# mua2		<- pvSpec$mua2
+			# }
+			# if(is.null(pvSpec$siga1)){
+					# siga1		<- rep(10, K)
+			# } else {
+				# siga1		<- pvSpec$siga1
+			# }
+			# if(is.null(pvSpec$siga2)){
+					# siga2		<- rep(10, K)		
+			# } else {
+				# siga2		<- pvSpec$siga2
+			# }
+		# } else {
+			# lambda		<- pvSpec$lambda
+			# omega		<- pvSpec$omega
+
+			# if(is.null(pvSpec$mut)){
+					# mut			<- rep(0, K)
+			# } else {
+				# mut			<- pvSpec$mut			
+			# }
+			# if(is.null(pvSpec$mub)){
+				# mub			<- rep(0, K)
+			# } else {
+				# mub			<- pvSpec$mub			
+			# }
+			# if(is.null(pvSpec$mua1)){
+					# mua1		<- rep(0, K)
+			# } else {
+				# mua1		<- pvSpec$mua1
+			# }
+			# if(is.null(pvSpec$mua2)){
+					# mua2		<- rep(0, K)		
+			# } else {
+				# mua2		<- pvSpec$mua2
+			# }
+			# if(is.null(pvSpec$siga1)){
+					# siga1		<- rep(10, K)
+			# } else {
+				# siga1		<- pvSpec$siga1
+			# }
+			# if(is.null(pvSpec$siga2)){
+					# siga2		<- rep(10, K)		
+			# } else {
+				# siga2		<- pvSpec$siga2
+			# }
+
+		# }		
+	# }
+	
+	# id00		<- rep(list(NULL), K)
+	# id10		<- rep(list(NULL), K)
+	# id01		<- rep(list(NULL), K)
+	# id11		<- rep(list(NULL), K)
+
+	# for(k in 1:K){
+		# id00[[k]]		<- which(X1[,k] == 0 & X2[,k] == 0)
+		# id10[[k]]		<- which(X1[,k] == 1 & X2[,k] == 0)
+		# id01[[k]]		<- which(X1[,k] == 0 & X2[,k] == 1)
+		# id11[[k]]		<- which(X1[,k] == 1 & X2[,k] == 1)
+		
+		# if(length(id00[[k]]) == 0 | length(id10[[k]]) == 0 | length(id01[[k]]) == 0 | length(id11[[k]]) == 0){
+			# stop('Population average tables must have non-zero counts')
+		# }
+	# }
+
+	# a1k		<- matrix(0, nrow = burn+B, ncol = K)
+	# a2k		<- matrix(0, nrow = burn+B, ncol = K)
+	
+	# theta	<- array(0, dim = c(n, K, burn+B))
+	# beta	<- matrix(0, nrow = burn+B, ncol = K)
+
+	# a1k[1,]		<- rep(0, K)
+	# a2k[1,]		<- rep(0, K)
+	# theta[,,1]	<- matrix(rep(runif(n, min = -0.1, max = 0.1)), nrow = n, ncol = K)
+	# beta[1,]	<- rep(0.1, K)
+	
+	# ar1			<- matrix(0, nrow = burn+B, ncol = K)
+	# ar2			<- matrix(0, nrow = burn+B, ncol = K)
+	# art			<- array(0, dim = c(4, K, burn+B))
+	# arb			<- matrix(0, nrow = burn+B, ncol = K)
+
+	# if(priorVar == 'VB'){
+		# # Sample \sigma_k^2 #
+		# sigbk	<- sigma2VB(n = n, K = K, th = theta[,,1], a_lambda, a_gamma, b_gamma, B_gamma = 0.01, tol, maxIter)
+		# sigk		<- matrix(rep(sigbk$est, each = burn + B), nrow = burn + B, ncol = K)
+
+		# # Sample \tau^2 #
+		# tau2b		<- tau2VB(n = n, K = K, be = beta[1,], a_omega, a_eta, b_eta, B_eta = 0.01, tol, maxIter)
+		# tau2		<- rep(tau2b$est, burn + B)
+	# } else if(priorVar == 'HC') {
+		# sigbk		<- sigma2VB(n = n, K = K, th = theta[,,1], a_lambda = 0.001, a_gamma = 0.001, b_gamma = 0.001, B_gamma = 0.01, tol = 1e-10, maxIter = 10)
+		# sVB			<- sigbk$est
+		
+		# tau2b		<- tau2VB(n = n, K = K, be = beta[1,], a_omega = 0.001, a_eta = 0.001, b_eta = 0.001, B_eta = 0.01, tol = 1e-5, maxIter = 10)
+		# tVB			<- tau2b$est
+
+		# sigk		<- matrix(1/lambda, nrow = burn+B, ncol = K)
+		# tau2		<- rep(1/omega, burn+B)
+	# } else {
+		# sigk		<- matrix(1/lambda, nrow = burn+B, ncol = K)
+		# tau2		<- rep(1/omega, burn+B)
+	# }
+
+	# arTau		<- vector('numeric', length = burn+B)
+	# arSig		<- matrix(0, nrow = burn+B, ncol = K)
+	
+	# # sampler #
+	# for(b in 2:(burn+B)){
+		
+		# if(priorVar == 'HC'){
+			# # Sample \tau^2 #
+			# tau2b	<- tau2UpdateHC(1, tau = tau2[b-1], tMean = tVB, tTune = tTune, n = n, K = K, be = beta[b-1,], nuTau = nuTau)
+			# tau2[b]		<- tau2b$est
+			# arTau[b]		<- tau2b$ar			
+			
+			# # Sample \sigma_k^2 #
+			# # sigbk	<- sigma2UpdateHC(1, sig = sigk[b-1,1], sMean = sVB, sTune = sTune, n = n, K = K, th = theta[,,b-1], nuSig = nuSig)
+			# # sigk[b,]	<- rep(sigbk$est, K)
+			# # arSig[b,]	<- rep(sigbk$ar, K)	
+		# } else if(priorVar == 'GA'){
+			# # Sample \tau^2 #
+			# omegab		<- tau2UpdateGA(1, n, K, beta[b-1,], at, bt)
+			# tau2[b]		<- 1/omegab
+
+			# # Sample \sigma_k^2 #
+			# lambdab	<- apply(theta[,,b-1], 2, sigma2UpdateGA, samp.size = 1, n = n, K = 1, as = as, bs = bs)
+			# sigk[b,]	<- 1/lambdab
+		# }
+				
+		# # loop over outcomes for  #
+		# for(k in 1:K){
+			# if(priorVar == 'HC'){
+				# # Sample \sigma_k^2 #
+				# sigbk	<- sigma2UpdateHC(1, sig = sigk[b-1,k], sMean = sVB[k], sTune = sTune[k], n = n, K = 1, th = theta[,k,b-1], nuSig = nuSig)
+				# sigk[b,k]	<- sigbk$est
+				# arSig[b,k]	<- sigbk$ar
+			# }
+			
+			# # sample \theta_ik #
+			# id00k	<- id00[[k]]
+			# id10k	<- id10[[k]]
+			# id01k	<- id01[[k]]
+			# id11k	<- id11[[k]]
+
+			# n00k		<- length(id00k)
+			# n10k		<- length(id10k)
+			# n01k		<- length(id01k)
+			# n11k		<- length(id11k)
+			
+			# yfix00	<- yfTBSelect(tInt = searchIntT, inc = incT, cent = centT, x1 = 0, x2 = 0, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k])
+			# yfix10	<- yfTBSelect(tInt = searchIntT, inc = incT, cent = centT, x1 = 1, x2 = 0, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k])
+			# yfix01	<- yfTBSelect(tInt = searchIntT, inc = incT, cent = centT, x1 = 0, x2 = 1, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k])
+			# yfix11	<- yfTBSelect(tInt = searchIntT, inc = incT, cent = centT, x1 = 1, x2 = 1, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k])
+
+			# thUp00k	<- tbUpdate(n00k, yfix00$yfix, x1 = 0, x2 = 0, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k], ymin, ymax, upFix, dlpThresh)
+			# thUp10k	<- tbUpdate(n10k, yfix10$yfix, x1 = 1, x2 = 0, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k], ymin, ymax, upFix, dlpThresh)
+			# thUp01k	<- tbUpdate(n01k, yfix01$yfix, x1 = 0, x2 = 1, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k], ymin, ymax, upFix, dlpThresh)
+			# thUp11k	<- tbUpdate(n11k, yfix11$yfix, x1 = 1, x2 = 1, beta[b-1,k], a1k[b-1,k], a2k[b-1,k], sigk[b-1,k], link, mut[k], ymin, ymax, upFix, dlpThresh)
+
+			# theta[id00k,k,b]	<- thUp00k$thetab
+			# theta[id10k,k,b]	<- thUp10k$thetab
+			# theta[id01k,k,b]	<- thUp01k$thetab
+			# theta[id11k,k,b]	<- thUp11k$thetab
+
+			# art[1,k,b]			<- n00k/thUp00k$count
+			# art[2,k,b]			<- n10k/thUp10k$count
+			# art[3,k,b]			<- n01k/thUp01k$count
+			# art[4,k,b]			<- n11k/thUp11k$count			
+
+			# # \alpha_1k
+			# yfixa1k		<- yfAlphaSelect(aInt = searchIntA, inc = incA, cent = centA, theta[,k,b-1], beta[b-1,k], X1[,k], link, mua1[k], siga1[k])
+			# yfika1		<- yfixa1k$yfix
+			# a1Upk		<- alphaUpdate(1, yfika1, theta[,k,b-1], beta[b-1,k], X1[,k], link, mua1[k], siga1[k], ymin, ymax, upFix, dlpThresh)
+			# a1k[b,k]		<- a1Upk$alphab
+			# ar1[b,k]		<- a1Upk$count
+			
+			# # \alpha_2k
+			# yfixa2k		<- yfAlphaSelect(aInt = searchIntA, inc = incA, cent = centA, theta[,k,b-1], beta[b-1,k], X2[,k], link, mua2[k], siga2[k])
+			# yfika2		<- yfixa2k$yfix
+			# a2Upk		<- alphaUpdate(1, yfika2, theta[,k,b-1], beta[b-1,k], X2[,k], link, mua2[k], siga2[k], ymin, ymax, upFix, dlpThresh)
+			# a2k[b,k]		<- a2Upk$alphab
+			# ar2[b,k]		<- a2Upk$count
+			
+			# # Sample \beta_k #
+			# yfixbk		<- yfTBSelect(tInt = searchIntB, inc = incB, cent = centB, X1[,k], X2[,k], theta[,k,b-1], a1k[b-1,k], a2k[b-1,k], tau2[b-1], link, mub[k])
+			# yfbk		<- yfixbk$yfix
+			# bkUp		<- tbUpdate(1, yfbk, X1[,k], X2[,k], theta[,k,b-1], a1k[b-1,k], a2k[b-1,k], tau2[b-1], link, mub[k], ymin, ymax, upFix, dlpThresh)
+			# beta[b,k]	<- bkUp$thetab
+			# arb[b,k]	<- bkUp$count
+		# }
+		
+		# if(priorVar == 'VB'){
+			# indv		<- vector(length = K)
+			# for(k in 1:K){
+				# indv[k]	<- sum(theta[,k,b]^2) > 0.08 & sum(theta[,k,b]^2) < 0.3
+			# }
+			# if(sum(indv) == K){
+				# # Sample \sigma_k^2 #
+				# sigbk					<- sigma2VB(n = n, K = K, th = theta[,,b], a_lambda, a_gamma, b_gamma, B_gamma = 0.01, tol, maxIter)
+				# sigk[b:(B+burn),]	<- sigbk$est
+			# }
+			
+			# if(sum(beta[b,]^2) > 0.02 & sum(beta[b,]^2) < 0.2){
+				# # Sample \tau^2 #
+				# tau2b					<- tau2VB(n = 1, K = K, be = beta[b,], a_omega, a_eta, b_eta, B_eta = 0.01, tol = 1e-5, maxIter = 10)
+				# # tau2b					<- tau2VB(n = n, K = K, be = beta[b,], a_omega, a_eta, b_eta, B_eta = 0.01, tol = 1e-5, maxIter = 10)
+				# tau2[b:(B+burn)]	<- rep(tau2b$est)
+			# }
+		# }
+
+		# if(mod(b, 10) == 0){
+			# cat('.')
+		# }
+		
+		# if(mod(b, up) == 0){
+			# cat(paste("\n",b,"samples completed\n"))
+		# }
+
+		# # if(b == burn){
+			# # cat("\nburn-in complete, begin sampling\n")
+		# # }
+
+		# # if(b > burn){
+			# # if(mod(b, up) == 0){
+				# # cat(paste("\n",b - burn,"samples completed\n"))
+			# # }
+		# # }
+	# }
+
+	# # calculate difference in treatment effects
+	# rho		<- a1k - a2k
+
+	# # name output matrices
+	# colnames(rho)	<- paste("rho", 1:K, sep = "")
+	# colnames(beta)	<- paste("beta", 1:K, sep = "")
+	# colnames(sigk)	<- paste("sigma", 1:K, sep = "")
+	# colnames(a1k)	<- colnames(X1)
+	# colnames(a2k)	<- colnames(X2)
+	# colnames(ar1)	<- colnames(X1)
+	# colnames(ar2)	<- colnames(X2)
+	
+	# alphas	<- list(alpha1 = a1k, alpha2 = a2k)
+	# aRate	<- list(arTheta = art, arBeta = arb, arAlpha1 = ar1, arAlpha2 = ar2, arTau = arTau, arSigma = arSig)
+	# if(priorVar == 'VB'){
+		# varComp	<- list(sigk2 = sigbk$est, E_lambda = sigbk$E_lambda, B_lambda = sigbk$B_lambda, tau2 = tau2b$est, E_omega = tau2b$E_omega, B_omega = tau2b$B_omega, fsig = sigk, ftau = tau2)
+	# } else if(priorVar == 'FX'){
+		# varComp	<- list(sigk2 = rep(1/lambda, K), tau2 = 1/omega)
+	# } else {
+		# varComp	<- list(sigk2 = sigk, tau2 = tau2)
+	# }
+	# MCMCsp	<- list(B = B, burn = burn, priorVar = priorVar, pvSpec = pvSpec)		
+	# data	<- list(X1 = X1, X2 = X2)
+	
+	# l		<- list(rho = rho, alphas = alphas, vars = varComp, theta = theta, beta = beta, accept = aRate, MCMCsp = MCMCsp, link = link, data	= data)
+	
+	# class(l)	<- 'bmir'
+
+	# return(l)
+	
+# }
+
 ## class related function for bmir objects ##
 
 print.bmir		<- function(mod){
@@ -1236,7 +1733,7 @@ getVar	<- function(mod){
 
 
 ### Independent Multinomials ###
-# Bayesian Independent Dirichlet-Multinomial Model: bidm #
+# Bayesian Independent Dirichlet-Multinomial Model: bim #
 
 getCounts	<- function(X1, X2, K){
 	n21		<- vector('numeric', length = K)
@@ -1297,8 +1794,7 @@ setPrior	<- function(X1, X2){
 	
 }
 
-## primary function for Bayesian Independent Dirichlet-Multinomial (bidm) model ##
-bidm	<- function(X1, X2, B, burnin = NULL, prior = NULL,...){
+bim	<- function(X1, X2, B, burnin = NULL, prior = NULL,...){
 	if(ncol(X1) != ncol(X2)){
 		stop('column dimensions of X1 and X2 must agree')
 	}
@@ -1331,7 +1827,7 @@ bidm	<- function(X1, X2, B, burnin = NULL, prior = NULL,...){
 	theta	<- array(0, dim = c(burnin + B, 4, K))
 	for(b in 1:(burnin + B)){
 		for(k in 1:K){
-			xk				<- c(counts$n21[k], counts$n12[k], counts$n11[k], counts$n22[k])
+			xk				    <- c(counts$n21[k], counts$n12[k], counts$n11[k], counts$n22[k])
 			theta[b, , k]	<- rdirichlet(1, alpha[k,] + xk)
 		}
 	}
@@ -1341,14 +1837,12 @@ bidm	<- function(X1, X2, B, burnin = NULL, prior = NULL,...){
 	
 	l		<- list(theta = theta, MCMCsp = MCMCsp, counts = counts, data = data)
 	
-	class(l)	<- 'bidm'
+	class(l)	<- 'bim'
 	
 	return(l)
 }
 
-## class related function for bidm objects ##
-
-print.bidm		<- function(mod){
+print.bim		<- function(mod){
 	K		<- dim(mod$theta)[3]
 	n		<- dim(mod$data$X1)[1]
 	B		<- mod$MCMCsp$B
@@ -1366,7 +1860,7 @@ print.bidm		<- function(mod){
 
 }
 
-summary.bidm	<- function(mod, ci_alpha = 0.05, chains = 4){
+summary.bim	<- function(mod, ci_alpha = 0.05, chains = 4){
 	K		<- dim(mod$theta)[3]
 	n		<- dim(mod$data$X1)[1]
 	B		<- mod$MCMCsp$B
@@ -1398,7 +1892,7 @@ summary.bidm	<- function(mod, ci_alpha = 0.05, chains = 4){
 	}
 }
 
-coef.bidm		<- function(mod, CI = FALSE, alpha = 0.05){
+coef.bim		<- function(mod, CI = FALSE, alpha = 0.05){
 	burnin	<- mod$MCMCsp$burnin
 
 	orTable		<- apply(mod$theta[-(1:burnin),1,]/mod$theta[-(1:burnin),2,], 2, quantile, probs = c(0.5, alpha/2, (1 - alpha/2)))
@@ -1412,7 +1906,7 @@ coef.bidm		<- function(mod, CI = FALSE, alpha = 0.05){
 	return(or)
 }
 
-bsd.bidm		<- function(mod, logOR = FALSE){
+bsd.bim		<- function(mod, logOR = FALSE){
 	burnin	<- mod$MCMCsp$burnin
 
 	if(logOR){
@@ -1423,7 +1917,7 @@ bsd.bidm		<- function(mod, logOR = FALSE){
 	return(orSD)
 }
 
-pprob.bidm	<- function(mod){
+pprob.bim	<- function(mod){
 	burnin	<- mod$MCMCsp$burnin
 	probs	<- apply(mod$theta[-c(1:burnin),1,] > mod$theta[-c(1:burnin),2,], 2, mean)
 	
@@ -1431,8 +1925,11 @@ pprob.bidm	<- function(mod){
 }
 
 
-## primary function for Bayesian SParsity Adjusted Matched-proportions (bspam) model ##
-bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None'), prior = NULL, ptype = c('Normal', 't'), covstr = 'Independence', up = 100, dots = up/10){
+### Penalized Marginal Probability Models ###
+# Bayesian SParsity Adjusted Matched-proportions model: BSPAM #
+
+bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Local', 't'), prior = NULL, mu = NULL,
+                  ptype = c('Normal', 'pe', 'Group'), covstr = 'Independence', up = 100, dots = up/10){
 	if(ncol(X1) != ncol(X2)){
 		stop('column dimensions of X1 and X2 must agree')
 	}
@@ -1449,13 +1946,17 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 		penalty <- penalty[1]
 	}
 	
-	if(penalty != 'Global' & penalty != 'Group' & penalty != 'None'){
-		stop('penalty must be either Global, Group, or None')
+	if(penalty != 'Global' & penalty != 'Local' & penalty != 't'){
+		stop('penalty must be either Global, Local, or t')
 	}
 
 	if(is.null(burnin)){
-		burnin	<- B
+		burnin    <- B
 	}
+  
+  if(is.null(mu)){
+    mu   <- 1/(n + 2)
+  }
 	
 	if(is.null(prior)){
 		if(penalty == 'Global'){
@@ -1464,7 +1965,8 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			bt		<- prior$bt <- 1
 			as		<- prior$as <- 1
 			bs		<- prior$bs <- 1
-		} else if(penalty == 'Group'){
+		} else if(penalty == 'Local'){
+		  ## CHECK PRIORS ##
 			prior	<- list()
 			aw		<- prior$aw <- 1
 			bw		<- prior$bw <- 1
@@ -1472,8 +1974,7 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			ba		<- prior$ba <- 1
 		} else {
 			prior	<- list()
-			al		<- prior$al <- 0.001
-			bl		<- prior$bl <- 0.001			
+			nu		<- prior$nu <- 5
 		}
 	} else {
 		if(penalty == 'Global'){
@@ -1481,7 +1982,7 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			bt		<- prior$bt
 			as		<- prior$as
 			bs		<- prior$bs
-		} else if(penalty == 'Group'){
+		} else if(penalty == 'Local'){
 			aw		<- prior$aw
 			bw		<- prior$bw
 			aa		<- prior$aa
@@ -1496,8 +1997,8 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 		ptype <- ptype[1]
 	}
 	
-	if(penalty == 'None'){
-		prior$type	<- 'Flat'
+	if(penalty == 't'){
+		prior$type	<- 't'
 	} else {
 		prior$type	<- ptype
 	}
@@ -1517,21 +2018,21 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 	sumX	<- c(apply(X1, 2, sum), apply(X2, 2, sum))
 	XsCols	<- c(which(apply(matrix(unlist(lapply(getCounts(X1, X2, K), function(x) x == 0)), nrow = 4, byrow = TRUE), 2, sum) > 0), which(apply(matrix(unlist(lapply(getCounts(X1, X2, K), function(x) x == 0)), nrow = 4, byrow = TRUE), 2, sum) > 0) + K)
 	
-	## add control to force sparse model? ##
-	
 	if(covstr == 'Independence'){
 		if(penalty == 'Global'){
-			xtx			<- t(X)%*%X
-			beb			<- (sumX + 1)/(n + 2)
-			prior$beb	<- beb
+			xtx			                <- t(X)%*%X
+			beb                     <- rep(mu, 2*K)
+			beb[which(sumX == 0)]   <- mu
+			bebf			              <- (sumX + 1)/(n + 2)
+			prior$beb               <- beb
 			
 			beta		<- matrix(0, nrow = B + burnin, ncol = ncol(X))
 			lambda		<- vector('numeric', length = B + burnin)
 			tau			<- vector('numeric', length = B + burnin)
 			sigk		<- matrix(1, nrow = B + burnin, ncol = ncol(X))
 			
-			lambda[1]	<- N/(sum((Y-X%*%beb)^2))
-			tau[1]		<- (2*K)/(t(beb)%*%(beb))
+			lambda[1]	<- N/(sum((Y-X%*%bebf)^2))
+			tau[1]		<- (2*K)/(t(bebf)%*%(bebf))
 			
 			for(b in 2:(B + burnin)){
 				## sample betas ##
@@ -1549,7 +2050,7 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 				tau[b]		<- rgamma(1, K + at, b_tau)
 				
 				## sample sigmas ##
-				if(ptype == 't'){
+				if(ptype == 'pe'){
 					b_sigk		<- bs + (tau[b]/2)*(beta[b,] - beb)^2
 					sigk[b,]	<- rgamma(length(b_sigk), (1/2) + as, b_sigk)
 				}
@@ -1563,38 +2064,44 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 				}
 			}
 	
-			rho			<- t(L%*%t(beta))
-			var.comp	<- list(lambda = lambda, tau = tau, sigk = sigk)
+			rho			    <- t(L%*%t(beta))
+			var.comp	  <- list(lambda = lambda, tau = tau, sigk = sigk)
 			mcmc.specs	<- list(B = B, burnin = burnin, penalty = penalty, prior = prior, covstr = covstr)
-			data.list	<- list(Y = Y, X = X, SparseCols = XsCols)
+			data.list	  <- list(Y = Y, X = X, SparseCols = XsCols)
 			
 			out			<- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
 			
-		} else if(penalty == 'Group'){
-			xtx			<- t(X)%*%X
-			beb			<- (sumX + 1)/(n + 2)
-			prior$beb	<- beb
+		} else if(penalty == 'Local'){
+			xtx			      <- t(X)%*%X
+			beb           <- rep(0, 2*K)
+			# beb[which(sumX == 0)]		<- 1/(n + 2)
+			beb[XsCols]   <- mu
+			bebf			    <- sumX/n + beb
+			prior$beb     <- beb
 			
-			ps			<- length(XsCols)
-			pn			<- ncol(X) - length(XsCols)
+			ps			    <- length(XsCols)
+			pn			    <- ncol(X) - length(XsCols)
 			
-			beta		<- matrix(0, nrow = B + burnin, ncol = ncol(X))
-			lambda		<- vector('numeric', length = B + burnin)
-			omegas		<- matrix(1, nrow = B + burnin, ncol = 2)
-			gammas		<- matrix(1, nrow = B + burnin, ncol = ncol(X))
+			beta		    <- matrix(0, nrow = B + burnin, ncol = ncol(X))
+			lambda      <- vector('numeric', length = B + burnin)
+			omegas      <- matrix(1, nrow = B + burnin, ncol = 2)
+			gammas      <- matrix(1, nrow = B + burnin, ncol = ncol(X))
 			
-			lambda[1]	<- N/(sum((Y-X%*%beb)^2))
-			omegas[1,]	<- c(length(XsCols)/(t(beb[XsCols])%*%(beb[XsCols])), (ncol(X) - length(XsCols))/(t(beb[-XsCols])%*%(beb[-XsCols])))
-			
+			lambda[1]   <- N/(sum((Y-X%*%bebf)^2))
+			omegas[1,]	<- c(length(XsCols)/(t(bebf[XsCols])%*%(bebf[XsCols])), (ncol(X) - length(XsCols))/(t(bebf[-XsCols])%*%(bebf[-XsCols])))
+			beta[1,]    <- bebf
+
 			for(b in 2:(B + burnin)){
 				## sample betas ##
-				was				<- rep(0, ncol(X))
+				was				    <- rep(0, ncol(X))
 				was[XsCols]		<- omegas[b-1,1]*gammas[b-1, XsCols]
-				was[-XsCols]	<- omegas[b-1,2]*gammas[b-1, -XsCols]
-				precb			<- lambda[b-1]*xtx + diag(was)
-				sigb			<- 1/diag(precb)
-				mub				<- sigb*(lambda[b-1]*t(X)%*%Y + diag(was)%*%beb)
-				beta[b,]		<- rnorm(ncol(X), mean = mub, sd = sqrt(sigb))
+				if(ptype == 'Group'){
+  				was[-XsCols]	<- omegas[b-1,2]*gammas[b-1, -XsCols]
+				}
+				precb			    <- lambda[b-1]*xtx + diag(was)
+				sigb			    <- 1/diag(precb)
+				mub				    <- sigb*(lambda[b-1]*t(X)%*%Y + diag(was)%*%beb)
+				beta[b,]		  <- rnorm(ncol(X), mean = mub, sd = sqrt(sigb))
 				
 				## sample lambda ##
 				b_lam			<- (1/2)*(t(Y - X%*%beta[b-1,])%*%(Y - X%*%beta[b-1,]))
@@ -1602,16 +2109,24 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			
 				## sample omegas ##
 				b_omegas		<- bw + (1/2)*sum(gammas[b-1, XsCols]*((beta[b-1, XsCols] - beb[XsCols])^2))
-				b_omegan		<- bw + (1/2)*sum(gammas[b-1, -XsCols]*((beta[b-1, -XsCols] - beb[-XsCols])^2))
+				if(ptype == 'Group'){
+				  b_omegan		<- bw + (1/2)*sum(gammas[b-1, -XsCols]*((beta[b-1, -XsCols] - beb[-XsCols])^2))
+				}
 				omegas[b,1]		<- rgamma(1, ps/2 + aw, b_omegas)
-				omegas[b,2]		<- rgamma(1, pn/2 + aw, b_omegan)
+				if(ptype == 'Group'){
+				  omegas[b,2]		<- rgamma(1, pn/2 + aw, b_omegan)
+				}
 				
-				## sample gammas ##
-				if(ptype == 't'){
+				## sample gammas ## -- remove for local?
+				if(ptype == 'pe'){
 					b_gammas			<- ba + (omegas[b,1]/2)*(beta[b, XsCols] - beb[XsCols])^2
-					b_gamman			<- ba + (omegas[b,2]/2)*(beta[b, -XsCols] - beb[-XsCols])^2
+					if(ptype == 'Group'){
+					  b_gamman			<- ba + (omegas[b,2]/2)*(beta[b, -XsCols] - beb[-XsCols])^2
+					}
 					gammas[b, XsCols]	<- rgamma(length(b_gammas), (1/2) + aa, b_gammas)
-					gammas[b, -XsCols]	<- rgamma(length(b_gamman), (1/2) + aa, b_gamman)
+					if(ptype == 'Group'){
+					  gammas[b, -XsCols]	<- rgamma(length(b_gamman), (1/2) + aa, b_gamman)
+					}
 				}
 					
 				if(mod(b, dots) == 0){
@@ -1623,52 +2138,72 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 				}
 			}
 			
-			rho			<- t(L%*%t(beta))
-			var.comp	<- list(lambda = lambda, omegas = omegas, gammas = gammas)
+			rho			    <- t(L%*%t(beta))
+			var.comp	  <- list(lambda = lambda, omegas = omegas, gammas = gammas)
 			mcmc.specs	<- list(B = B, burnin = burnin, penalty = penalty, prior = prior, covstr = covstr)
-			data.list	<- list(Y = Y, X = X, SparseCols = XsCols)
+			data.list	  <- list(Y = Y, X = X, SparseCols = XsCols)
 			
-			out			<- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
+			out			    <- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
 			
 		} else {
-			lambda		<- vector('numeric', length = B + burnin)
+		  xtx			                <- t(X)%*%X
+		  beb                     <- rep(mu, 2*K)
+		  # beb[which(sumX == 0)]   <- mu
+		  bebf			              <- (sumX + 1)/(n + 2)
+		  prior$beb               <- beb
+		  
+		  lambda	<- vector('numeric', length = B + burnin)
 			beta		<- matrix(0, nrow = B + burnin, ncol = ncol(X))
-			xtxi		<- solve(t(X)%*%X) 
-			bols		<- xtxi%*%t(X)%*%Y
-			
-			lambda[1]	<- 1/((1/(N-ncol(X)))*sum((Y-X%*%bols)^2))
-			beta[1,]	<- bols
+			tau			<- vector('numeric', length = B + burnin)
+			sigk		<- matrix(1, nrow = B + burnin, ncol = ncol(X))
+
+			lambda[1]	<- 1
+			tau[1]		<- 1
+			beta[1,]	<- bebf
 			
 			for (b in 2:(B + burnin)) { 
-				# Sample Beta #
-				beta[b,]	<- c(rmvnorm(1, bols, (1/lambda[b-1])*xtxi)) 
-			
-				# Sample lambda #
-				b_lam		<- bl + (1/2)*(t(Y - X%*%beta[b-1,])%*%(Y - X%*%beta[b-1,]))
-				lambda[b]	<- rgamma(1, al + N/2, b_lam)
+			  ## sample betas ##
+			  precb		<- lambda[b-1]*xtx + diag(1/sigk[b-1,])
+			  sigb		<- 1/diag(precb)
+			  mub			<- sigb*(lambda[b-1]*t(X)%*%Y + diag(1/sigk[b-1,])%*%beb)
+			  beta[b,]	<- rnorm(ncol(X), mean = mub, sd = sqrt(sigb))
+			  
+			  ## sample lambda ##
+			  b_lam		<- (1/2)*(t(Y - X%*%beta[b-1,])%*%(Y - X%*%beta[b-1,]))
+			  lambda[b]	<- rgamma(1, N/2, b_lam)
 
-				if(mod(b, dots) == 0){
-					cat('.')
-				}
-		
-				if(mod(b, up) == 0){
-					cat(paste("\n",b,"samples completed\n"))
-				}
+			  ## sample sigmas ##
+			  b_sigk		<- (nu*tau[b-1]/2) + (1/2)*(beta[b-1,] - beb)^2
+			  sigk[b,]	<- rgamma(length(b_sigk), (nu+1)/2, b_sigk)
+
+			  ## sample tau ##
+			  b_tau		  <- (nu/2)*sum(1/sigk[b,])
+			  tau[b]		<- rgamma(1, (2*K*nu)/2, b_tau)
+			  
+			  if(mod(b, dots) == 0){
+			    cat('.')
+			  }
+			  
+			  if(mod(b, up) == 0){
+			    cat(paste("\n",b,"samples completed\n"))
+			  }
 			}
 			
-			rho			<- t(L%*%t(beta))
-			var.comp	<- list(lambda = lambda)
+			rho			    <- t(L%*%t(beta))
+			var.comp	  <- list(lambda = lambda, sigk = sigk, tau = tau)
 			mcmc.specs	<- list(B = B, burnin = burnin, penalty = penalty, prior = prior, covstr = covstr)
-			data.list	<- list(Y = Y, X = X, SparseCols = XsCols)
+			data.list	  <- list(Y = Y, X = X, SparseCols = XsCols)
 			
-			out			<- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
+			out			    <- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
 	
 		}
 	} else if(covstr == 'Unstructured'){
 		if(penalty == 'Global'){
 			xtx		<- t(X)%*%X
-			beb		<- (sumX + 1)/(n + 2)
-			ones	<- matrix(1, nrow = n, ncol = 1)
+			beb                     <- rep(0, 2*K)
+			beb[which(sumX == 0)]		<- mu
+			bebf			              <- (sumX + 1)/(n + 2)
+			ones	                  <- matrix(1, nrow = n, ncol = 1)
 
 			beta	<- matrix(0, nrow = B + burnin, ncol = ncol(X))
 			lambda	<- array(0, dim = c(ncol(X), ncol(X), B + burnin))
@@ -1676,7 +2211,7 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			sigk	<- matrix(1, nrow = B + burnin, ncol = ncol(X))
 			
 			lambda[,,1]	<- diag(ncol(X))
-			tau[1]		<- (2*K)/(t(beb)%*%(beb))
+			tau[1]		<- (2*K)/(t(bebf)%*%(bebf))
 			beta[1,]	<- beb
 			
 			for(b in 2:(B + burnin)){
@@ -1697,7 +2232,7 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 				b_tau		<- bt + (1/2)*sum(sigk[b-1,]*((beta[b-1,] - beb)^2))
 				tau[b]		<- rgamma(1, K + at, b_tau)
 				
-				if(ptype == 't'){
+				if(ptype == 'pe'){
 					## sample sigmas ##
 					b_sigk		<- bs + (tau[b]/2)*(beta[b,] - beb)^2
 					sigk[b,]	<- rgamma(length(b_sigk), (1/2) + as, b_sigk)
@@ -1719,36 +2254,41 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			
 			out			<- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
 			
-		} else if(penalty == 'Group'){
-			xtx			<- t(X)%*%X
-			beb			<- (sumX + 1)/(n + 2)
-			ones		<- matrix(1, nrow = n, ncol = 1)
-			prior$beb	<- beb
+		} else if(penalty == 'Local'){
+		  xtx			      <- t(X)%*%X
+			beb           <- rep(0, 2*K)
+			# beb[which(sumX == 0)]		<- 1/(n + 2)
+			beb[XsCols]   <- mu
+			bebf			    <- sumX/n + beb
+			ones		      <- matrix(1, nrow = n, ncol = 1)
+			prior$beb	    <- beb
 		
-			ps			<- length(XsCols)
-			pn			<- ncol(X) - length(XsCols)
+			ps			    <- length(XsCols)
+			pn			    <- ncol(X) - length(XsCols)
 			
-			beta		<- matrix(0, nrow = B + burnin, ncol = ncol(X))
-			lambda		<- array(0, dim = c(ncol(X), ncol(X), B + burnin))
-			omegas		<- matrix(1, nrow = B + burnin, ncol = 2)
-			gammas		<- matrix(1, nrow = B + burnin, ncol = ncol(X))
+			beta		    <- matrix(0, nrow = B + burnin, ncol = ncol(X))
+			lambda		  <- array(0, dim = c(ncol(X), ncol(X), B + burnin))
+			omegas		  <- matrix(1, nrow = B + burnin, ncol = 2)
+			gammas		  <- matrix(1, nrow = B + burnin, ncol = ncol(X))
 			
 			lambda[,,1]	<- diag(ncol(X))
-			omegas[1,]	<- c(length(XsCols)/(t(beb[XsCols])%*%(beb[XsCols])), (ncol(X) - length(XsCols))/(t(beb[-XsCols])%*%(beb[-XsCols])))
-			beta[1,]	<- beb
+			omegas[1,]	<- c(length(XsCols)/(t(bebf[XsCols])%*%(bebf[XsCols])), (ncol(X) - length(XsCols))/(t(bebf[-XsCols])%*%(bebf[-XsCols])))
+			beta[1,]	  <- bebf
 			
 			for(b in 2:(B + burnin)){
 				## sample betas ##
-				was				<- rep(0, ncol(X))
+				was				    <- rep(0, ncol(X))
 				was[XsCols]		<- omegas[b-1,1]*gammas[b-1, XsCols]
-				was[-XsCols]	<- omegas[b-1,2]*gammas[b-1, -XsCols]
+				if(ptype == 'Group'){
+				  was[-XsCols]	<- omegas[b-1,2]*gammas[b-1, -XsCols]
+				}
 				Lam				<- kronecker(lambda[,,b-1], diag(n))
 				xtLx			<- t(X)%*%Lam%*%X
 				xtLY			<- t(X)%*%Lam%*%Y				
 				precb			<- xtLx + diag(was)
 				sigb			<- solve(precb)
 				mub				<- sigb%*%(xtLY + diag(was)%*%beb)
-				beta[b,]		<- rmvnorm(1, mean = mub, sigma = sigb)
+				beta[b,]  <- rmvnorm(1, mean = mub, sigma = sigb)
 				
 				## sample lambda ##
 				LS			<- solve(t(Ym - ones%*%beta[b-1,])%*%(Ym - ones%*%beta[b-1,]) + diag(ncol(X)))
@@ -1756,16 +2296,24 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 			
 				## sample omegas ##
 				b_omegas		<- bw + (1/2)*sum(gammas[b-1, XsCols]*((beta[b-1, XsCols] - beb[XsCols])^2))
-				b_omegan		<- bw + (1/2)*sum(gammas[b-1, -XsCols]*((beta[b-1, -XsCols] - beb[-XsCols])^2))
+				if(ptype == 'Group'){
+				  b_omegan		<- bw + (1/2)*sum(gammas[b-1, -XsCols]*((beta[b-1, -XsCols] - beb[-XsCols])^2))
+				}
 				omegas[b,1]		<- rgamma(1, ps/2 + aw, b_omegas)
-				omegas[b,2]		<- rgamma(1, pn/2 + aw, b_omegan)
+				if(ptype == 'Group'){
+				  omegas[b,2]		<- rgamma(1, pn/2 + aw, b_omegan)
+				}
 				
-				if(ptype == 't'){
+				if(ptype == 'pe'){
 					## sample gammas ##
 					b_gammas			<- ba + (omegas[b,1]/2)*(beta[b, XsCols] - beb[XsCols])^2
-					b_gamman			<- ba + (omegas[b,2]/2)*(beta[b, -XsCols] - beb[-XsCols])^2
+					if(ptype == 'Group'){
+					  b_gamman			<- ba + (omegas[b,2]/2)*(beta[b, -XsCols] - beb[-XsCols])^2
+					}
 					gammas[b, XsCols]	<- rgamma(length(b_gammas), (1/2) + aa, b_gammas)
-					gammas[b, -XsCols]	<- rgamma(length(b_gamman), (1/2) + aa, b_gamman)
+					if(ptype == 'Group'){
+					  gammas[b, -XsCols]	<- rgamma(length(b_gamman), (1/2) + aa, b_gamman)
+					}
 				}
 					
 				if(mod(b, dots) == 0){
@@ -1777,12 +2325,12 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 				}
 			}
 			
-			rho			<- t(L%*%t(beta))
-			var.comp	<- list(lambda = lambda, omegas = omegas, gammas = gammas)
+			rho			    <- t(L%*%t(beta))
+			var.comp	  <- list(lambda = lambda, omegas = omegas, gammas = gammas)
 			mcmc.specs	<- list(B = B, burnin = burnin, penalty = penalty, prior = prior, covstr = covstr)
-			data.list	<- list(Y = Y, X = X, SparseCols = XsCols)
+			data.list	  <- list(Y = Y, X = X, SparseCols = XsCols)
 			
-			out			<- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
+			out			    <- list(rho = rho, beta = beta, var.comp = var.comp, mcmc.specs = mcmc.specs, data = data.list)
 			
 		} else {
 			lambda		<- array(0, dim = c(ncol(X), ncol(X), B + burnin))
@@ -1830,8 +2378,6 @@ bspam	<- function(X1, X2, B, burnin = NULL, penalty = c('Global', 'Group', 'None
 	return(out)
 
 }
-
-## class related function for bspam objects ##
 
 print.bspam		<- function(mod){
 	K		<- ncol(mod$data$X)/2
@@ -1951,8 +2497,6 @@ cmhlc	<- function(X1, X2, exact = TRUE, alpha = 0.05, direction = "two.sided"){
 	return(l)
 }
 
-## class related function for cmhlc objects ##
-
 print.cmhlc	<- function(mod){
 	K		<- ncol(mod$data$X1)
 	n		<- nrow(mod$data$X1)
@@ -2022,21 +2566,27 @@ gbmp	<- function(X1, X2, family = gaussian(link = 'identity'), corstr = 'indepen
 	covb	<- summary(model)$cov.scaled
 	# covb	<- (t(Y - beta)%*%(Y - beta))/(n^2)
 
-	L	<- cbind(diag(K), -diag(K))
 
 	# tests of differences #
-	rho		<- L%*%beta
-	seRho	<- sqrt(diag(L%*%covb%*%t(L)))
-	lower	<- rho - qnorm(0.975)*seRho
-	upper	<- rho + qnorm(0.975)*seRho
-	wald	<- (rho/seRho)^2
-	pval	<- 1 - pchisq(wald, 1)
+	L	      <- cbind(diag(K), -diag(K))
+	rho		  <- L%*%beta
+	seRho   <- sqrt(diag(L%*%covb%*%t(L)))
+	lower	  <- rho - qnorm(0.975)*seRho
+	upper	  <- rho + qnorm(0.975)*seRho
+	wald	  <- (rho/seRho)^2
+	pval	  <- 1 - pchisq(wald, 1)
 
 	## Simultaneous Marginal Homogeneity ##
 	# KA Generalized Score Test #
-	Tgs		<- (n^2)*t(rho)%*%solve(L%*%(t(Y)%*%Y)%*%t(L))%*%rho
-	pTgs	<- 1 - pchisq(Tgs, nrow(L))
-	
+	zse     <- which(diag(covb) == 0)
+# 	if(length(zse) == 0){
+#   	Tgs		<- (n^2)*t(rho)%*%solve(L%*%(t(Y)%*%Y)%*%t(L))%*%rho
+#   	pTgs	<- 1 - pchisq(Tgs, nrow(L))
+# 	} else {
+	  Tgs		<- NaN
+	  pTgs	<- NaN
+  # }
+
 	## if estimating 
 	if(corstr == 'unstructured'){
 		cory	<- matrix(0, 2*K, 2*K)
@@ -2047,14 +2597,16 @@ gbmp	<- function(X1, X2, family = gaussian(link = 'identity'), corstr = 'indepen
 		cory	<- NULL
 	}
 	
-	l		<- list(rho = rho, beta = beta, sdv = seRho, cov = list(covb = covb, cory = cory), lower = lower, upper = upper, wald = wald, pval = pval, model = model, smh = list(Tgs = Tgs, pTgs = pTgs), data = list(X1 = X1, X2 = X2))
+	l		<- list(rho = rho, beta = beta, sdv = seRho, cov = list(covb = covb, cory = cory, zse = zse), lower = lower, upper = upper, wald = wald, pval = pval, model = model, smh = list(Tgs = Tgs, pTgs = pTgs), data = list(X1 = X1, X2 = X2))
 
 	class(l)	<- 'gbmp'
 	
+# 	if(zse > 0){
+#   	warning('Sparse columns detected, variance estimates may be singular')
+# 	}
+	
 	return(l)
 }
-
-## class related function for gbmp objects ##
 
 print.gbmp	<- function(mod){
 	K		<- ncol(mod$data$X1)
@@ -2113,7 +2665,11 @@ bootmmp	<- function(X1, X2, B, int.hyp = FALSE){
 	D		<- t(L%*%t(X))
 	Dbar	<- apply(D, 2, mean)
 	S		<- diag(apply((t(t(D) - Dbar))^2, 2, mean))
-	Z		<- sqrt(n)*solve(sqrt(S))%*%Dbar
+	if(length(which(diag(S) == 0)) > 0){
+	  Z <- NaN
+	} else{
+  	Z		<- sqrt(n)*solve(sqrt(S))%*%Dbar
+	}
 	
 	Dboot	<- matrix(0, nrow = B, ncol = K)
 	if(int.hyp){
@@ -2144,8 +2700,6 @@ bootmmp	<- function(X1, X2, B, int.hyp = FALSE){
 	
 	return(l)
 }
-
-## class related function for bootmmp objects ##
 
 print.bootmmp	<- function(mod){
 	K		<- ncol(mod$data$X1)
