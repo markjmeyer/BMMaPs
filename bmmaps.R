@@ -1,9 +1,9 @@
 ############# Bayesian Multivariate Matched Proportions #############
 # R functions to run Bayesian Multivariate Matched Proportions		
-#	from Meyer and Knutson 2019 									
+#	from Meyer and Knutson 2020 									
 #																	
 # Created:  07/25/2018												
-# Modified: 07/15/2019												
+# Modified: 02/21/2020												
 #																	
 # By: Mark J Meyer													
 #																	
